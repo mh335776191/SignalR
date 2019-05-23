@@ -1,0 +1,92 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+<link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+
+<div class="jumbotron">
+
+
+</div>
+
+<div class="row">
+
+    <h2>@ViewBag.Message</h2>
+    <div>
+        <div><span>提示：</span><span id="j_notice"></span></div>
+        <div style="margin-top:20px">
+            <button id="j_connect">建立连接</button>
+            <button id="j_close">关闭连接</button>
+        </div>
+        <div style="margin-top:20px">
+            <input type="text" value="" placeholder="请输入接收人的标记" id="j_receiveId" />
+            <input type="text" value="" placeholder="请输入发送内容" id="j_content" />
+            <button id="j_send">发送消息</button>
+        </div>
+        <div>
+            <ul id="j_Msg"></ul>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script src="@Url.Content("~/Scripts/jquery.signalR-2.4.1.min.js")" type="text/javascript"></script>
+@*
+     Web客户端用法说明
+     1. 配置路径:$.connection("/test");需要与Startup中的对应 $.hubConnection() 集线器模式   $.connection.chat 代理模式需要<script src="~/signalr/hubs" type="text/javascript"></script> 这个不存在的路径，代理模式下会有自动生成的脚本
+     2. 常用的几个方法有：
+        ① start：开启连接
+        ② received：接受服务器发送来的消息
+        ③ disconnected：连接中断时调用
+        ④ error：连接发生错误的时嗲用
+        ④ stop：断开连接
+        ⑤ send：发送消息
+     另外还有：connectionSlow、stateChanged、reconnecting、reconnected等等
+    3. 当前连接状态有4种
+     connecting: 0(正在连接),   connected: 1(正常连接),  reconnecting: 2（正在重连）,    disconnected: 4 （掉线了）
+*@
+<script type="text/javascript">
+    $(function () {
+        var conn = $.connection("/MyPersistentConnection");
+        //一. 监控
+        //1. 接受服务器发来的消息
+        conn.received(function (data) {
+            $("#j_Msg").append("<li>接受到服务端的消息：" + data + "</li>");
+        });
+        //2. 连接断开的方法
+        conn.disconnected(function () {
+            $("#j_notice").html("连接中断");
+        });
+        //3. 连接发生错误时候触发
+        conn.error(function (data) {
+            $("#j_notice").html(data);
+        });
+        //二. 主动事件
+        //1.建立连接
+        $("#j_connect").click(function () {
+            conn.start(function () {
+                $("#j_notice").html("连接成功");
+            });
+        });
+        //2.断开连接
+        $("#j_close").click(function () {
+            conn.stop();
+        });
+        //3.发送消息
+        $("#j_send").click(function () {
+            //发送消息之前要判断连接状态,conn.state有4中状态
+            //connecting: 0(正在连接),   connected: 1(正常连接),  reconnecting: 2（正在重连）,    disconnected: 4 （掉线了）
+            console.log(conn.state);
+            if (conn.state == 1) {
+                conn.send({ receiveId: $("#j_receiveId").val(), msg: $("#j_content").val() });
+
+            } else if (conn.state == 0) {
+                $("#j_notice").html("正在连接中，请稍等");
+            } else if (conn.state == 2) {
+                $("#j_notice").html("正在重连，请稍等");
+            } else if (conn.state == 4) {
+                $("#j_notice").html("掉线了，请重新连接");
+            }
+
+        });
+
+    });
+</script>

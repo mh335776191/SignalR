@@ -1,0 +1,80 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>About</title>
+
+</head>
+<body>
+    <div>
+        <span id="webSocketStatusSpan"></span><br/>
+        @Html.TextBox("nameTextBox")<br/>
+        <span id="webSocketReceiveDataSpan"></span></br>
+        <input type="button" onclick="SendData()" value="提交" />
+    </div>
+</body>
+<script type="text/javascript">
+
+    var webSocketStatusSpan = document.getElementById("webSocketStatusSpan");
+    var webSocketReceiveDataSpan = document.getElementById("webSocketReceiveDataSpan");
+    var nameTextBox = document.getElementById("nameTextBox");
+
+    var webSocket;
+
+    //The address of our HTTP-handler
+    var handlerUrl = "ws://normalwebsocket.com/home/NormalSocket";
+
+    function SendData() {
+
+        //Initialize WebSocket.
+        InitWebSocket();
+
+        //Send data if WebSocket is opened.
+        if (webSocket.OPEN && webSocket.readyState == 1)
+            webSocket.send(nameTextBox.value);
+
+        //If WebSocket is closed, show message.
+        if (webSocket.readyState == 2 || webSocket.readyState == 3)
+            webSocketStatusSpan.innerText = "WebSocket closed, the data can't be sent.";
+    }
+
+    function CloseWebSocket() {
+        webSocket.close();
+    }
+
+    function InitWebSocket() {
+
+        //If the WebSocket object isn't initialized, we initialize it.
+        if (webSocket == undefined) {
+            webSocket = new WebSocket(handlerUrl);
+
+            //Open connection  handler.
+            webSocket.onopen = function () {
+                webSocketStatusSpan.innerText = "WebSocket opened.";
+                webSocket.send(nameTextBox.value);
+            };
+
+            //Message data handler.
+            webSocket.onmessage = function (e) {
+                webSocketReceiveDataSpan.innerText = webSocketReceiveDataSpan.innerText+ e.data;
+            };
+
+            //Close event handler.
+            webSocket.onclose = function () {
+                webSocketStatusSpan.innerText = "WebSocket closed.";
+            };
+
+            //Error event handler.
+            webSocket.onerror = function (e) {
+                webSocketStatusSpan.innerText = e.message;
+            }
+        }
+    }
+</script>
+</html>
