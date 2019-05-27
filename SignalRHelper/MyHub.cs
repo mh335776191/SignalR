@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 
@@ -20,8 +21,8 @@ namespace SignalRHelper
             Clients.All.ClientGetOnlineUserNum(_UserCount);
         }
         public void SendMsg(string text)
-        { 
-            Clients.All.SendMsg(text);
+        {
+            Clients.All.SendMsg(text + "：来自服务器 " + GetWebRemoteIp());
         }
         public override Task OnConnected()
         {
@@ -33,13 +34,21 @@ namespace SignalRHelper
         {
             if (_UserCount > 0)
                 _UserCount -= 1;
-            Clients.All.UserOutLine(Context.ConnectionId + " 时间：" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")); 
+            Clients.All.UserOutLine(Context.ConnectionId + " 时间：" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             return base.OnDisconnected(stopCalled);
         }
         public override Task OnReconnected()
         {
             Clients.All.ReconnectedMsg(Context.ConnectionId);
             return base.OnReconnected();
+        }
+        /// <summary>
+        /// 获取Web远程Ip
+        /// </summary>
+        /// <returns></returns>
+        private static string GetWebRemoteIp()
+        {
+            return HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"] ?? HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
         }
     }
 }

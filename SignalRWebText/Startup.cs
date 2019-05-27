@@ -15,6 +15,7 @@ namespace SignalRWebText
         {
             var userIdProvider = new CookiesUserIdProvider();
             GlobalHost.DependencyResolver.Register(typeof(IUserIdProvider), () => userIdProvider);//获取用户表示
+            GlobalHost.DependencyResolver.UseStackExchangeRedis("127.0.0.1", 6379, "123456", "signalR");
 
             app.MapSignalR();//默认将 SignalR 集线器映射到“/signalr”处的应用生成器管道。
             //GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(30);
