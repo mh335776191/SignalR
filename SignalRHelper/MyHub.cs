@@ -5,10 +5,15 @@ using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 
 namespace SignalRHelper
-{
+{ 
     [HubName("MyHub")]
     public class MyHub : Hub
     {
+        public async Task SendMessage(string user, string message)
+        {
+            await Clients.All.SendAsync("ReceiveMessage", user, message);
+        }
+
         private static int _UserCount = 0;
         public int Sum(int a, int b)
         {
@@ -49,6 +54,6 @@ namespace SignalRHelper
         private static string GetWebRemoteIp()
         {
             return HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"] ?? HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
-        }
+        } 
     }
 }

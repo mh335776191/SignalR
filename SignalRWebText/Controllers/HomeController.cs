@@ -34,5 +34,9 @@ namespace SignalRWebText.Controllers
         {
             return View();
         }
+        public ActionResult UserNotifiTest()
+        {
+            return View();
+        }
     }
 }

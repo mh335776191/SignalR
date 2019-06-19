@@ -11,11 +11,12 @@ namespace SignalRHelper
     {
         public string GetUserId(IRequest request)
         {
-            if (request.GetHttpContext().Request.Cookies["UserInfo"] != null)
-            {
-                return request.GetHttpContext().Request.Cookies["UserInfo"].Value;
-            }
-            return "";
+            //if (request.GetHttpContext().Request.Cookies["UserInfo"] != null)
+            //{
+            //    return request.GetHttpContext().Request.Cookies["UserInfo"].Value;
+            //}
+            return request.QueryString["userKey"];
+            //return "";
         }
     }
 }
